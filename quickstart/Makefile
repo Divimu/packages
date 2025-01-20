@@ -55,7 +55,6 @@ define Build/Configure
 endef
 
 define Build/Compile
-	$(STAGING_DIR_HOST)/bin/upx --lzma --best $(PKG_BUILD_DIR)/$(PKG_NAME)
 endef
 
 define Package/$(PKG_NAME)/install
