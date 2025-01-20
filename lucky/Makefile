@@ -67,6 +67,8 @@ define Build/Prepare
 endef
 
 define Build/Compile
+       $(call GoPackage/Build/Compile)
+       $(STAGING_DIR_HOST)/bin/upx --lzma --best $(GO_PKG_BUILD_BIN_DIR)/lucky
 endef
 
 define Package/$(PKG_NAME)/install
