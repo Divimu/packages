@@ -1,7 +1,5 @@
 #!/bin/sh
 
-sed -i "s/op.supes.top/dl.openwrt.ai/" /etc/opkg/distfeeds.conf
-
 ([ -x /bin/bash ] && ! grep -q "^root.*bash" /etc/passwd) && sed -i "s/^\(root.*\/\)ash/\1bash/g" /etc/passwd
 
 # [[ "$(df | grep overlay)" && ! "$(df | grep /rom/overlay)" ]] && firstboot
@@ -53,7 +51,6 @@ if [[ ! "$version" || "$version" -lt 1 ]]; then
 		uci -q set system.@system[0].ttylogin='1'
 		uci -q del system.ntp.server
 		uci -q add_list system.ntp.server='ntp.aliyun.com'
-		uci -q add_list system.ntp.server='0.openwrt.pool.ntp.org'
 		uci commit system
 	fi
 
@@ -110,7 +107,12 @@ fi
 
 # kB
 memtotal=`grep MemTotal /proc/meminfo | awk '{print $2}'`
-if [ "$memtotal" -ge 1048576 ]; then
+if [ "$memtotal" -ge 2097152 ]; then
+	# <= 2048M
+	cachesize=10000
+	dnsforwardmax=10000
+	nf_conntrack_max=524288
+elif [ "$memtotal" -ge 1048576 ]; then
 	# > 1024M
 	cachesize=10000
 	dnsforwardmax=10000
