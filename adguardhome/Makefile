@@ -67,6 +67,11 @@ define Build/Prepare
 	gzip -dc $(DL_DIR)/$(FRONTEND_FILE) | $(HOST_TAR) -C $(PKG_BUILD_DIR)/ $(TAR_OPTIONS)
 endef
 
+define Build/Compile
+	$(call GoPackage/Build/Compile)
+	$(STAGING_DIR_HOST)/bin/upx --lzma --best $(GO_PKG_BUILD_BIN_DIR)/AdGuardHome
+endef
+
 define Package/adguardhome/install
 	$(call GoPackage/Package/Install/Bin,$(1))
 endef
