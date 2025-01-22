@@ -1,0 +1,57 @@
+name: Build OpenWrt IPK
+
+on:
+  workflow_dispatch:
+    inputs:
+      architecture:
+        description: 'Target architecture'
+        required: true
+        default: 'all'
+        options:
+          - all
+      package:
+        description: 'Package to build'
+        required: true
+        default: 'all'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v1
+      - name: Build IPK
+        run: |
+          docker pull openwrt/sdk:${{ github.event.inputs.architecture }}
+          docker run --name openwrtsdk -e FORCE_UNSAFE_CONFIGURE=1 -e TERM=xterm openwrt/sdk:${{ github.event.inputs.architecture }} /bin/bash -c "
+            echo 'src-git kiddin9 https://github.com/kiddin9/openwrt-packages' >>feeds.conf.default &&
+            ./scripts/feeds update -a &&
+            ./scripts/feeds install ${{ github.event.inputs.package }} &&
+            make defconfig &&
+            make package/${{ github.event.inputs.package }}/{clean,compile} -j$(nproc) &&
+            find /builder/bin/packages -name '*${{ github.event.inputs.package }}*.ipk'
+          "
+          docker cp openwrtsdk:/builder/bin/packages ./packages
+      - name: Upload IPK as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ipk-files
+          path: packages/**/*.ipk
+      - name: Generate release tag
+        id: tag
+        run: |
+          echo "::set-output name=release_tag::$(date +"%Y.%m.%d_%H-%M")_${{ github.event.inputs.architecture }}_${{ github.event.inputs.package }}"
+
+      - name: Create Release and Upload Asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./packages/**/*${{ github.event.inputs.package }}*.ipk
+          tag_name: ${{ steps.tag.outputs.release_tag }}
+          name: Release ${{ steps.tag.outputs.release_tag }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
