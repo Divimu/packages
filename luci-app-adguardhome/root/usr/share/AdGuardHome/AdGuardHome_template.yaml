@@ -24,11 +24,14 @@ dns:
   ratelimit_whitelist: []
   refuse_any: false
   upstream_dns:
-  - 223.5.5.5
+  - https://dns.alidns.com/dns-query
+  - https://dns.pub/dns-query
   upstream_dns_file: ""
   bootstrap_dns:
-  - 119.29.29.29
-  - 223.5.5.5
+  - 183.221.253.100
+  - 211.137.96.205
+  - 2409:8062:2000:1::1
+  - 2409:8062:2000:1::2
   fallback_dns: []
   all_servers: false
   fastest_addr: false
@@ -42,7 +45,7 @@ dns:
   trusted_proxies:
     - 127.0.0.0/8
     - ::1/128
-  cache_size: 4194304
+  cache_size: 536870912
   cache_ttl_min: 0
   cache_ttl_max: 0
   cache_optimistic: false
